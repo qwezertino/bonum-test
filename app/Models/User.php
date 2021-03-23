@@ -4,8 +4,10 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -17,19 +19,32 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name',
+        'fullname',
         'email',
+        'birth_date',
         'password',
+        'role_id',
+        'api_token',
     ];
 
+    protected $attributes = [
+        'role_id' => 2,
+    ];
+
+    protected $appends = [
+        'role'
+    ];
     /**
      * The attributes that should be hidden for arrays.
      *
      * @var array
      */
     protected $hidden = [
+        'id',
+        'role_id',
         'password',
-        'remember_token',
+        'created_at',
+        'updated_at',
     ];
 
     /**
@@ -38,6 +53,35 @@ class User extends Authenticatable
      * @var array
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        'birth_date' => 'datetime:Y-m-d',
     ];
+
+    public function generateToken(): string
+    {
+        $this->api_token = Str::random(60);
+        $this->save();
+
+        return $this->api_token;
+    }
+
+    public function getRoleName()
+    {
+        return $this->role()->first()->name;
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(UserRole::class, 'role_id');
+    }
+
+    /**
+     * @return string
+     */
+    public function getRoleAttribute(): string
+    {
+        return $this->role()->first()->name;
+    }
 }
