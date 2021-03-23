@@ -23,8 +23,10 @@ class CheckUserRole
     {
         $user = Auth::guard()->user();
 
-        if ($user->getRoleName() !== $role) {
-            throw new AuthenticationException('Access denied!');
+        if ($user->getRoleName() !== env('APP_ROLE_ADMIN')) {
+            if ($user->getRoleName() !== $role) {
+                throw new AuthenticationException('Access denied!');
+            }
         }
 
         return $next($request);

@@ -24,13 +24,17 @@ use Illuminate\Support\Facades\Route;
 });*/
 
 Route::group(['middleware' => 'auth:api'], function() {
-    Route::apiResource('articles', ArticleController::class)->middleware('check_user_role:' . env('APP_ROLE_USER'));
 
-    Route::group(['middleware' => 'check_user_role:' . env('APP_ROLE_ADMIN')], function() {
-        Route::apiResources([
-            'users' => UserController::class,
-            'user/roles' => UserRoleController::class,
-        ]);
+
+    Route::group(['middleware' => 'check_user_role:' . env('APP_ROLE_USER')], function() {
+        Route::apiResource('articles', ArticleController::class);
+
+        Route::group(['middleware' => 'check_user_role:' . env('APP_ROLE_ADMIN')], function() {
+            Route::apiResources([
+                'users' => UserController::class,
+                'user/roles' => UserRoleController::class,
+            ]);
+        });
     });
 });
 
